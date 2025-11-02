@@ -14,6 +14,6 @@ def health():
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 
-@router.post("/agent/run", response_model=AgentResponse)
+@router.post("/agent/run")
 async def run_agent_endpoint(request: AgentRequest):
-    return run_agent(request.prompt)
+    return run_agent(request.prompt, request.system)
