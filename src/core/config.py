@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     
     MCP_URL: str = "http://localhost:8000/sse"  # endereço do servidor MCP
+    
+    OPENAI_API_KEY: str
+    MODEL_NAME: str = "gpt-4o-mini"
 
     class Config:
         env_file = ".env"
