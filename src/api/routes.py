@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 import logging
 from src.core.config import settings
+from src.models.agent_models import AgentRequest, AgentResponse
 from src.services.agent import run_agent 
-from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -13,9 +13,7 @@ def health():
     logger.info("Verificação de saúde OK.")
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
-class AgentRequest(BaseModel):
-    prompt: str
 
-@router.post("/agent/run")
+@router.post("/agent/run", response_model=AgentResponse)
 async def run_agent_endpoint(request: AgentRequest):
     return run_agent(request.prompt)
