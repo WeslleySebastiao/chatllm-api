@@ -17,3 +17,10 @@ def health():
 @router.post("/agent/run")
 async def run_agent_endpoint(request: AgentRequest):
     return run_agent(request.prompt, request.system)
+
+@router.get("/lsit_tools")
+async def list_tools_endpoint():
+    from src.services.mcp import MCPClient
+    mcp = MCPClient(base_url="http://localhost:8000")
+    tools = mcp.listar_tools()
+    return {"tools": tools}
