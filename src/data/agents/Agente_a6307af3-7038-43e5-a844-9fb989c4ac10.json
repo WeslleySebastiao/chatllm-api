@@ -1,0 +1,11 @@
+{
+  "id": "Agente_a6307af3-7038-43e5-a844-9fb989c4ac10",
+  "name": "Agente",
+  "description": "Agente conversacional local",
+  "provider": "OpenAI",
+  "model": "gpt-4o-mini",
+  "tools": [
+    "memory",
+    "search"
+  ]
+}

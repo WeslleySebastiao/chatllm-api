@@ -2,25 +2,25 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from src.core.config import settings
+from src.data.db_control import DBControl
+from src.models.agent_models import *
 
+class AgentManager:
+    def recover_agent(id: str):
+        return DBControl.load_agent(id)
 
-def run_agent(prompt: str, system: str) -> dict:
-    llm = ChatOpenAI(
-        model=settings.MODEL_NAME,
-        openai_api_key=settings.OPENAI_API_KEY,
-        temperature=0.7,
-    )
+    def run_agent(self, prompt: str, id: str) -> dict:
+        #1
+        agent = self.recover_agent(id)
 
-    # Cria o template do prompt com system + human
-    template = ChatPromptTemplate.from_messages([
-        ("system", system),
-        ("human", "{user_input}")
-    ])
+        #2
+        prompt = [
+            {"role": "system", "content": f"{agent.promt}"},
+            {"role": "user", "content": "Write a haiku about spring"},
+            {"role": "assistant", "content": "Cherry blossoms bloom..."}
+        ]
 
-    # Preenche o template dinamicamente
-    messages = template.format_messages(user_input=prompt)
+        #3
+        response = agent.invoke(prompt)
 
-    # Envia pro modelo
-    response = llm.invoke(messages)
-
-    return {"response": response.content}
+        return response
