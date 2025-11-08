@@ -4,7 +4,7 @@ import logging
 from src.data.db_control import *
 from src.core.config import settings
 from src.models.agent_models import AgentRequest, AgentResponse, AgentConfig
-from src.services.agent import run_agent 
+from src.services.agent import AgentManager
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -17,7 +17,6 @@ def health():
 
 @router.post("/agent")
 async def create_agent(agent: AgentConfig):
-    agent = DBControl.create(agent)
     DBControl.save_agent(agent)
     return JSONResponse(
         content={"message": "Agente criado com sucesso", "agent_id": agent.id},
@@ -25,8 +24,8 @@ async def create_agent(agent: AgentConfig):
     )
 
 @router.post("/agent/run")
-async def run_agent_endpoint(request: AgentRequest):
-    return run_agent(request.prompt, request.system)
+async def run_agent_endpoint(user_prompt: str, id: str):
+    return AgentManager.run_agent(user_prompt, id)
 
 @router.get("/lsit_tools")
 async def list_tools_endpoint():

@@ -1,0 +1,11 @@
+{
+  "id": "meu_agente",
+  "name": "meu_agente_exemplo",
+  "description": "Um agente de IA para responder perguntas sobre o clima e rotas.",
+  "provider": "openai",
+  "model": "gpt-4o",
+  "prompt": "Você é um assistente prestativo",
+  "tools": [
+    ""
+  ]
+}
