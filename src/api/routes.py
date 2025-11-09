@@ -1,10 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
+import asyncio
 from fastapi.responses import JSONResponse
 import logging
+from src.services.mcp import MCPClient
 from src.data.db_control import *
 from src.core.config import settings
-from src.models.agent_models import AgentRequest, AgentResponse, AgentConfig
+from src.models.agent_models import AgentRequest, AgentResponse, AgentConfig, AgentRunRequest
 from src.services.agent import AgentManager
+
+def get_global_mcp_client(request: Request):
+
+    return request.app.state.mcp_sse_client
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -34,12 +40,25 @@ async def create_agent(agent: AgentConfig):
     )
 
 @router.post("/agent/run")
-async def run_agent_endpoint(user_prompt: str, id: str):
-    return AgentManager.run_agent(user_prompt, id)
+async def run_agent_endpoint(run_request: AgentRunRequest):
+    return AgentManager.run_agent(run_request.user_prompt, run_request.id)
 
-@router.get("/lsit_tools")
-async def list_tools_endpoint():
-    from src.services.mcp import MCPClient
-    mcp = MCPClient(base_url="http://localhost:8000")
-    tools = mcp.listar_tools()
-    return {"tools": tools}
+@router.get("/list_tools") 
+async def list_tools_endpoint(
+    # 1. Injeta a dependência: O FastAPI chama 'get_global_mcp_client'
+    #    e passa o cliente global para a variável 'mcp_client'.
+    mcp_client: MCPClient = Depends(get_global_mcp_client)
+):
+    """
+    Lista as tools utilizando a conexão SSE global e persistente.
+    """
+    try:
+        # 2. Usa o cliente global (mcp_client)
+        #    Como 'listar_tools()' é síncrono, usamos 'asyncio.to_thread'
+        #    para não bloquear o servidor.
+        tools = await asyncio.to_thread(mcp_client.listar_tools)
+        return {"tools": tools}
+    
+    except Exception as e:
+        # É uma boa prática lidar com possíveis erros
+        return {"error": f"Falha ao listar tools: {str(e)}"}
