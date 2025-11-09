@@ -17,7 +17,15 @@ def health():
 
 @router.post("/agent")
 async def create_agent(agent: AgentConfig):
-    DBControl.save_agent(agent)
+    a = DBControl.create(
+        name=agent.name,
+        description=agent.description,
+        provider=agent.provider,
+        model=agent.model,
+        tools=agent.tools,
+        prompt=agent.prompt
+    )
+    DBControl.save_agent(a)
     return JSONResponse(
         content={"message": "Agente criado com sucesso", "agent_id": agent.id},
         status_code=201

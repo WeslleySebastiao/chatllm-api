@@ -10,6 +10,8 @@ class AgentConfig:
     provider: str
     model: str
     prompt: str
+    temperature: float
+    max_tokens: int
     tools: Any
 
 class AgentRequest(BaseModel):
