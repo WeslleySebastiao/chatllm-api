@@ -1,10 +1,12 @@
 {
-  "id": "meu_agente",
-  "name": "meu_agente_exemplo",
+  "id": "meu_agente_exemplo2_02433081-ad90-45d0-935f-a12b0be1311f",
+  "name": "meu_agente_exemplo2",
   "description": "Um agente de IA para responder perguntas sobre o clima e rotas.",
   "provider": "openai",
   "model": "gpt-4o",
   "prompt": "Você é um assistente prestativo",
+  "temperature": 0.7,
+  "max_tokens": 1024,
   "tools": [
     ""
   ]

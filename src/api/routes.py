@@ -23,11 +23,13 @@ async def create_agent(agent: AgentConfig):
         provider=agent.provider,
         model=agent.model,
         tools=agent.tools,
-        prompt=agent.prompt
+        prompt=agent.prompt,
+        temperature=agent.temperature,
+        max_tokens=agent.max_tokens
     )
     DBControl.save_agent(a)
     return JSONResponse(
-        content={"message": "Agente criado com sucesso", "agent_id": agent.id},
+        content={"message": "Agente criado com sucesso", "agent_id": a.id},
         status_code=201
     )
 
