@@ -25,7 +25,7 @@ class DBControl:
             model=model,
             prompt=prompt,
             temperature=temperature,
-            max_tokens=max,
+            max_tokens=max_tokens,
             tools=tools
         )
 

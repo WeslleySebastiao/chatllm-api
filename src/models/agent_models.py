@@ -14,6 +14,10 @@ class AgentConfig:
     max_tokens: int
     tools: Any
 
+class AgentRunRequest(BaseModel):
+    user_prompt: str
+    id: str
+
 class AgentRequest(BaseModel):
     system: str = "Você é um assistente útil e responde em português."
     prompt: str

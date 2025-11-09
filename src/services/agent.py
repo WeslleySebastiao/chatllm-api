@@ -1,18 +1,16 @@
 from langchain_openai import ChatOpenAI
-
 # Para o Agente
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
-
 from src.data.db_control import DBControl
 from src.models.agent_models import AgentConfig
 class AgentManager:
     @staticmethod
-    def recover_agent(self, id: str):
+    def recover_agent( id: str):
         return DBControl.load_agent(id)
 
     @staticmethod
-    def run_agent(self, user_prompt: str, id: str) -> dict:
+    def run_agent(user_prompt: str, id: str) -> dict:
         # Recuperar config do agente
         try:
             cfg = AgentManager.recover_agent(id)
