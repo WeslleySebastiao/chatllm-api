@@ -50,17 +50,14 @@ async def run_agent_endpoint(run_request: AgentRunRequest):
 
 @router.get("/list_tools") 
 async def list_tools_endpoint(
-    # 1. Injeta a dependência: O FastAPI chama 'get_global_mcp_client'
-    #    e passa o cliente global para a variável 'mcp_client'.
+
     mcp_client: MCPClient = Depends(get_global_mcp_client)
 ):
     """
     Lista as tools utilizando a conexão SSE global e persistente.
     """
     try:
-        # 2. Usa o cliente global (mcp_client)
-        #    Como 'listar_tools()' é síncrono, usamos 'asyncio.to_thread'
-        #    para não bloquear o servidor.
+
         tools = await asyncio.to_thread(mcp_client.listar_tools)
         return {"tools": tools}
     
