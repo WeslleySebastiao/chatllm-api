@@ -1,26 +1,46 @@
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
-from langchain_core.prompts import ChatPromptTemplate
-from src.core.config import settings
+# Para o Agente
+from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
 from src.data.db_control import DBControl
-from src.models.agent_models import *
-
+from src.models.agent_models import AgentConfig
 class AgentManager:
-    def recover_agent(id: str):
+    @staticmethod
+    def recover_agent( id: str):
         return DBControl.load_agent(id)
 
-    def run_agent(self, prompt: str, id: str) -> dict:
-        #1
-        agent = self.recover_agent(id)
+    @staticmethod
+    def run_agent(user_prompt: str, id: str) -> dict:
+        # Recuperar config do agente
+        try:
+            cfg = AgentManager.recover_agent(id)
 
-        #2
-        prompt = [
-            {"role": "system", "content": f"{agent.promt}"},
-            {"role": "user", "content": "Write a haiku about spring"},
-            {"role": "assistant", "content": "Cherry blossoms bloom..."}
+        except Exception as e:
+            return {"error": f"Failed to load agent config: {e}", "agent_id": id}
+        
+        model = ChatOpenAI(model=cfg.model, 
+                           temperature=cfg.temperature, 
+                           max_tokens=cfg.max_tokens,
+
+                           )
+        
+        messages = [
+            {"role": "system", "content": cfg.prompt},
+            {"role": "user", "content": user_prompt}
         ]
 
-        #3
-        response = agent.invoke(prompt)
-
-        return response
+        result = model.invoke(messages)
+        return {"result": result, "agent_id": id}
+  
+    
+    def _create_agent(self, agent: AgentConfig, **kwargs) -> ChatOpenAI:
+        """
+        Cria e retorna um AgentExecutor.
+        """
+        llm = ChatOpenAI(
+            model=agent.model,
+            temperature=agent.temperature,
+            max_tokens=agent.max_tokens
+        )
+        
+        return llm

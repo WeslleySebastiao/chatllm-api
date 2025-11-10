@@ -15,7 +15,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 class DBControl:
 
     @staticmethod
-    def create(name: str, description: str, provider: str, model: str, tools: Any, prompt: str):
+    def create(name: str, description: str, provider: str, model: str, tools: Any, prompt: str, temperature: float = 0.7, max_tokens: int = 2048) -> AgentConfig:
         """Cria um novo registro com id único."""
         return AgentConfig(
             id= f"{name}_{uuid4()}",  # gera um id único
@@ -24,6 +24,8 @@ class DBControl:
             provider=provider,
             model=model,
             prompt=prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
             tools=tools
         )
 
