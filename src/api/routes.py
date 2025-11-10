@@ -24,11 +24,16 @@ async def create_agent(agent: AgentConfig):
         status_code=201
     )
 
+@router.get("/agent")
+async def list_agent():
+   agent =  DBControl.list_agents()
+   return agent
+
 @router.post("/agent/run")
 async def run_agent_endpoint(request: AgentRequest):
     return run_agent(request.prompt, request.system)
 
-@router.get("/lsit_tools")
+@router.get("/lisit_tools")
 async def list_tools_endpoint():
     from src.services.mcp import MCPClient
     mcp = MCPClient(base_url="http://localhost:8000")
