@@ -1,6 +1,7 @@
 # **EM CONSTRUÇÃO!**
 
 # 🚀 [Nome do Projeto]
+Autor: Weslley da Costa Sebastião
 
 > Esta API orquestra o ciclo de vida (registro e execução) de agentes personalizados, permitindo-lhes acessar opcionalmente tools hospedadas em um servidor MCP.
 
