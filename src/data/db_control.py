@@ -18,7 +18,7 @@ class DBControl:
     def create(name: str, description: str, provider: str, model: str, tools: Any, prompt: str, temperature: float = 0.7, max_tokens: int = 2048) -> AgentConfig:
         """Cria um novo registro com id único."""
         return AgentConfig(
-            id= f"{name}_{uuid4()}",  # gera um id único
+            id= f"{name}_{uuid4()}",  
             name=name,
             description=description,
             provider=provider,

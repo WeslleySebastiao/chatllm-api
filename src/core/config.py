@@ -3,14 +3,16 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Configurações globais da aplicação."""
     
-    APP_NAME: str = "ChatLLM API"
-    APP_VERSION: str = "0.2.0"
+    APP_NAME: str 
+    APP_VERSION: str 
     DEBUG: bool = True
     
-    MCP_URL: str = "http://localhost:8000/sse"  # endereço do servidor MCP
+    MCP_URL: str  # endereço do servidor MCP
     
     OPENAI_API_KEY: str
-    MODEL_NAME: str = "gpt-4o-mini"
+    MODEL_NAME: str 
+
+    FRONT_URL: str 
 
     class Config:
         env_file = ".env"
