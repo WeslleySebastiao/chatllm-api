@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import logging
 import uvicorn
 import time
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from src.core.config import settings
 from src.services.mcp import MCPClient
@@ -28,6 +29,14 @@ app = FastAPI(
     lifespan=lifespan  
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.FRONT_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_exception_handler(APIError, api_error_handler)
 app.include_router(router)
 
@@ -37,5 +46,5 @@ def read_root():
     return {"message": f"Welcome to {settings.APP_NAME}!"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="localhost", port=8080)
     
