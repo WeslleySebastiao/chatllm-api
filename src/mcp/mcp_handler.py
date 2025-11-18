@@ -1,0 +1,1 @@
+"""Onde as requisições vindas dos agentes (internos e externos) são recebidas e tratas"""

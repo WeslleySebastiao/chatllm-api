@@ -5,7 +5,6 @@ import time
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from src.core.config import settings
-from src.services.mcp import MCPClient
 from src.core.logging import setup_logging
 from src.core.exceptions import APIError, api_error_handler
 from src.api.routes import router 
@@ -16,10 +15,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Iniciando conexão SSE global com o MCP...")
-    app.state.mcp_sse_client = MCPClient("http://localhost:8000")
-    yield
-    print("Fechando conexão SSE global...")
+    pass
 
 app = FastAPI(
     # Seus parâmetros antigos:

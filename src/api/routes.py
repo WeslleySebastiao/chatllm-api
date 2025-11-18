@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 import asyncio
+from mcp.handler import handle_mcp_request
 from fastapi.responses import JSONResponse
 import logging
 from src.services.mcp import MCPClient
@@ -8,9 +9,6 @@ from src.core.config import settings
 from src.models.agent_models import AgentRequest, AgentResponse, AgentConfig, AgentRunRequest
 from src.services.agent import AgentManager
 
-def get_global_mcp_client(request: Request):
-
-    return request.app.state.mcp_sse_client
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -64,3 +62,10 @@ async def list_tools_endpoint(
     except Exception as e:
         # É uma boa prática lidar com possíveis erros
         return {"error": f"Falha ao listar tools: {str(e)}"}
+    
+@router.post("/mcp")
+async def mcp_entrypoint(request: dict):
+    """
+    Recebe o JSON-RPC e envia para o modulo de MCP responsável
+    """
+    return await handle_mcp_request(request)
