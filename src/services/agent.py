@@ -4,7 +4,7 @@ from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from src.data.db_control import DBControl
 from src.models.agent_models import AgentConfig
-from src.core.config import Settings
+from src.core.config import settings
 import os
 
 
@@ -26,6 +26,7 @@ class AgentManager:
         model = ChatOpenAI(model=cfg.model, 
                            temperature=cfg.temperature, 
                            max_tokens=cfg.max_tokens,
+                           openai_api_key=settings.OPENAI_API_KEY
                            )
         
         messages = [
