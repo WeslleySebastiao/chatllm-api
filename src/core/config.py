@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-
+import os
 class Settings(BaseSettings):
     """Configurações globais da aplicação."""
     
@@ -7,11 +7,8 @@ class Settings(BaseSettings):
     APP_VERSION: str 
     DEBUG: bool = True
     
-    MCP_URL: str  # endereço do servidor MCP
-    
     OPENAI_API_KEY: str
     MODEL_NAME: str 
-
     FRONT_URL: str 
 
     class Config:

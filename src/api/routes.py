@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 import asyncio
-from mcp.handler import handle_mcp_request
 from fastapi.responses import JSONResponse
 import logging
-from src.services.mcp import MCPClient
 from src.data.db_control import *
 from src.core.config import settings
 from src.models.agent_models import AgentRequest, AgentResponse, AgentConfig, AgentRunRequest
@@ -46,26 +44,26 @@ async def list_agent():
 async def run_agent_endpoint(run_request: AgentRunRequest):
     return AgentManager.run_agent(run_request.user_prompt, run_request.id)
 
-@router.get("/list_tools") 
-async def list_tools_endpoint(
+# # @router.get("/list_tools")
+# # async def list_tools_endpoint(
 
-    mcp_client: MCPClient = Depends(get_global_mcp_client)
-):
-    """
-    Lista as tools utilizando a conexão SSE global e persistente.
-    """
-    try:
+# # #     mcp_client: MCPClient = Depends(get_global_mcp_client)
+# # # ):
+# # #     """
+# # #     Lista as tools utilizando a conexão SSE global e persistente.
+# # #     """
+# # #     try:
 
-        tools = await asyncio.to_thread(mcp_client.listar_tools)
-        return {"tools": tools}
-    
-    except Exception as e:
-        # É uma boa prática lidar com possíveis erros
-        return {"error": f"Falha ao listar tools: {str(e)}"}
-    
-@router.post("/mcp")
-async def mcp_entrypoint(request: dict):
-    """
-    Recebe o JSON-RPC e envia para o modulo de MCP responsável
-    """
-    return await handle_mcp_request(request)
+# # #         tools = await asyncio.to_thread(mcp_client.listar_tools)
+# # #         return {"tools": tools}
+
+#     except Exception as e:
+#         # É uma boa prática lidar com possíveis erros
+#         return {"error": f"Falha ao listar tools: {str(e)}"}
+
+# @router.post("/mcp")
+# async def mcp_entrypoint(request: dict):
+#     """
+#     Recebe o JSON-RPC e envia para o modulo de MCP responsável
+#     """
+#     return await handle_mcp_request(request)

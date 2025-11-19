@@ -4,6 +4,10 @@ from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from src.data.db_control import DBControl
 from src.models.agent_models import AgentConfig
+from src.core.config import Settings
+import os
+
+
 class AgentManager:
     @staticmethod
     def recover_agent( id: str):
@@ -12,6 +16,7 @@ class AgentManager:
     @staticmethod
     def run_agent(user_prompt: str, id: str) -> dict:
         # Recuperar config do agente
+
         try:
             cfg = AgentManager.recover_agent(id)
 
@@ -21,7 +26,6 @@ class AgentManager:
         model = ChatOpenAI(model=cfg.model, 
                            temperature=cfg.temperature, 
                            max_tokens=cfg.max_tokens,
-
                            )
         
         messages = [
