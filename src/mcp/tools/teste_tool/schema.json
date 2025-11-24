@@ -1,0 +1,11 @@
+{
+  "description": "Apenas um tool para teste de front",
+  "type": "object",
+  "properties": {
+    "argumento1": {
+      "type": "NONE",
+      "description": "NONE"
+    }
+  },
+  "required": [""]
+}

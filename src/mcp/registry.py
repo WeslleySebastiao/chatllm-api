@@ -21,6 +21,9 @@ def get_openai_format_tools():
         for name, schema in TOOLS.items()
     ]
 
+def get_all_tools():
+    return TOOLS
+
 async def invoke_tool(name, arguments):
     tool = TOOLS[name]
     return await tool["func"](**arguments)

@@ -9,8 +9,8 @@ from src.core.logging import setup_logging
 from src.core.exceptions import APIError, api_error_handler
 from src.api.routes import router 
 from src.mcp.loader import load_all_tools
-
 import os
+
 print("OPENAI_API_KEY no ambiente:", os.getenv("OPENAI_API_KEY"))
 print("Settings:", settings.OPENAI_API_KEY)
 
