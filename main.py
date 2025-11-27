@@ -1,14 +1,18 @@
+from src.core.config import settings
 from fastapi import FastAPI
 import logging
 import uvicorn
 import time
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from src.core.config import settings
-from src.services.mcp import MCPClient
 from src.core.logging import setup_logging
 from src.core.exceptions import APIError, api_error_handler
 from src.api.routes import router 
+from src.mcp.loader import load_all_tools
+import os
+
+print("OPENAI_API_KEY no ambiente:", os.getenv("OPENAI_API_KEY"))
+print("Settings:", settings.OPENAI_API_KEY)
 
 # Configura logs
 setup_logging()
@@ -16,10 +20,12 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Iniciando conexão SSE global com o MCP...")
-    app.state.mcp_sse_client = MCPClient("http://localhost:8000")
+    logger.info('Server Initializer')
+    logger.info('Loading tools')
+    load_all_tools()
+    logger.info('Tool loaded')
     yield
-    print("Fechando conexão SSE global...")
+    logger.info('Shutdown Complete')
 
 app = FastAPI(
     # Seus parâmetros antigos:
