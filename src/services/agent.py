@@ -4,7 +4,7 @@ from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from src.data.db_control import DBControl
 from src.models.agent_models import AgentConfig
-from src.core.config import settings
+from src.services.agent_runtime import AgentRuntime
 from src.mcp.registry import get_all_tools
 import os
 
@@ -16,39 +16,20 @@ class AgentManager:
 
     @staticmethod
     def run_agent(user_prompt: str, id: str) -> dict:
-        # Recuperar config do agente
-
+        # 1. Carrega a config persistida do agente
         try:
             cfg = AgentManager.recover_agent(id)
-
         except Exception as e:
             return {"error": f"Failed to load agent config: {e}", "agent_id": id}
-        
-        model = ChatOpenAI(model=cfg.model, 
-                           temperature=cfg.temperature, 
-                           max_tokens=cfg.max_tokens,
-                           openai_api_key=settings.OPENAI_API_KEY
-                           )
-        
-        tools = AgentRuntime._load_tools_for_agent(cfg)
 
-        agent = create_agent(
-            model=model,
-            tools=tools,
-            system_prompt=cfg.prompt,  # seu prompt salvo no JSON
-        )
-        
-        messages = [
-            {"role": "system", "content": cfg.prompt},
-            {"role": "user", "content": user_prompt}
-        ]
+        # 2. Executa o agente usando o runtime cognitivo
+        try:
+            final_output = AgentRuntime.run(user_prompt, cfg)
+        except Exception as e:
+            return {"error": f"Agent execution error: {e}", "agent_id": id}
 
-        result = agent.invoke({
-            "messages": [
-                {"role": "user", "content": user_prompt}
-            ]
-        })
-        return {"result": result, "agent_id": id}
+        # 3. Retorna resultado padronizado
+        return {"result": final_output, "agent_id": id}
     
 
     def _load_tools_for_agent(cfg) -> list:

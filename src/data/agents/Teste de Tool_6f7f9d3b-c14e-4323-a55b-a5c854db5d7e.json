@@ -1,0 +1,13 @@
+{
+  "id": "Teste de Tool_6f7f9d3b-c14e-4323-a55b-a5c854db5d7e",
+  "name": "Teste de Tool",
+  "description": "Testar tools.",
+  "provider": "openai",
+  "model": "gpt-4o",
+  "prompt": "Voce é um agente usado para testar tool. Sempre use a tool disponivel e retorna EXATAMENTE o que a tool respondeu e um descritivo da sua avaliação.",
+  "temperature": 0.7,
+  "max_tokens": 1024,
+  "tools": [
+    "hello_world"
+  ]
+}
