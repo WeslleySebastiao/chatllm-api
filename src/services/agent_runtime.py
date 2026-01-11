@@ -36,6 +36,12 @@ class AgentRuntime:
 
             tool_functions.append(func)
 
+        print("cfg.tools =", cfg.tools)
+
+        print("tools carregadas =", [name for name in all_tools.keys()])
+
+        print("tools finais =", tool_functions)
+
         return tool_functions
 
 
@@ -52,6 +58,7 @@ class AgentRuntime:
             temperature=cfg.temperature,
             max_tokens=cfg.max_tokens,
             api_key=settings.OPENAI_API_KEY,
+
         )
 
         # 2. Carregar tools

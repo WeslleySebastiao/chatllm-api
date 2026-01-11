@@ -33,30 +33,21 @@ class AgentManager:
     
 
     def _load_tools_for_agent(cfg) -> list:
-        """
-            Pega do MCP só as tools permitidas na config do agente.
-        """
+        """Pega do MCP só as tools permitidas na config do agente."""
 
-        all_tools = get_all_tools()  # precisa ver o formato real
+        all_tools = get_all_tools()
 
-        tools = []
-        for name in cfg.tools:  # ex: ["hello_world"]
-            t = all_tools.get(name)  # ou lista/loop, depende da sua implementação
-            if not t:
+        allowed = set(cfg.tools)
+        tool_objects = []
+
+        for name, info in all_tools.items():
+            if name not in allowed:
                 continue
+            
+            tool_objects.append(info["func"])
 
-            func = t["func"]  # função Python carregada lá no load_all_tools
+        return tool_objects
 
-            # Opcional: usar schema pra descrição
-            schema = t.get("schema", {})
-            desc = schema.get("description")
-            if desc and not getattr(func, "__doc__", None):
-                func.__doc__ = desc
-
-            tools.append(func)
-
-        return tools
-  
     
     def _create_agent(self, agent: AgentConfig, **kwargs) -> ChatOpenAI:
         """
