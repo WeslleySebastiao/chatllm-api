@@ -11,9 +11,6 @@ from src.api.routes import router
 from src.mcp.loader import load_all_tools
 import os
 
-print("OPENAI_API_KEY no ambiente:", os.getenv("OPENAI_API_KEY"))
-print("Settings:", settings.OPENAI_API_KEY)
-
 # Configura logs
 setup_logging()
 logger = logging.getLogger(__name__)
