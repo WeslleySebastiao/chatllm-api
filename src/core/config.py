@@ -9,7 +9,13 @@ class Settings(BaseSettings):
     
     OPENAI_API_KEY: str
     MODEL_NAME: str 
-    FRONT_URL: str 
+    FRONT_URL: str
+
+    SUPABASE_DB_USER : str
+    SUPABASE_DB_PASSWORD : str
+    SUPABASE_DB_HOST : str
+    SUPABASE_DB_PORT : int
+    SUPABASE_DB_NAME : str
 
     class Config:
         env_file = ".env"

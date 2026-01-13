@@ -1,17 +1,18 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
+from src.core.config import settings
 import os
 
 load_dotenv()
 
 def get_conn():
     return psycopg2.connect(
-        user=os.getenv("SUPABASE_DB_USER"),
-        password=os.getenv("SUPABASE_DB_PASSWORD"),
-        host=os.getenv("SUPABASE_POOLER_HOST"),   # use o pooler transaction
-        port=os.getenv("SUPABASE_POOLER_PORT", "6543"),
-        dbname=os.getenv("SUPABASE_DB_NAME", "postgres"),
+        user=settings.SUPABASE_DB_USER,
+        password=settings.SUPABASE_DB_PASSWORD,
+        host=settings.SUPABASE_DB_HOST,
+        port=settings.SUPABASE_DB_PORT,
+        dbname=settings.SUPABASE_DB_NAME,
         sslmode="require",
     )
 

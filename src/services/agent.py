@@ -6,6 +6,7 @@ from src.data.db_control import DBControl
 from src.models.agent_models import AgentConfig
 from src.services.agent_runtime import AgentRuntime
 from src.mcp.registry import get_all_tools
+from src.data.supaBase_agent_db import SupaBaseAgentDB
 import os
 
 
@@ -18,7 +19,7 @@ class AgentManager:
     def run_agent(user_prompt: str, id: str) -> dict:
         # 1. Carrega a config persistida do agente
         try:
-            cfg = AgentManager.recover_agent(id)
+            cfg = SupaBaseAgentDB.get_agent(id)
         except Exception as e:
             return {"error": f"Failed to load agent config: {e}", "agent_id": id}
 

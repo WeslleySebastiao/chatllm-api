@@ -7,6 +7,9 @@ from src.core.config import settings
 from src.models.agent_models import AgentRequest, AgentResponse, AgentConfig, AgentRunRequest
 from src.services.agent import AgentManager
 from src.mcp.registry import get_all_tools
+from src.data.supaBase_agent_db import SupaBaseAgentDB
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +23,7 @@ def health():
 
 @router.post("/agent")
 async def create_agent(agent: AgentConfig):
-    a = DBControl.create(
+    agent = SupaBaseAgentDB.create_agent(
         name=agent.name,
         description=agent.description,
         provider=agent.provider,
@@ -28,18 +31,27 @@ async def create_agent(agent: AgentConfig):
         tools=agent.tools,
         prompt=agent.prompt,
         temperature=agent.temperature,
-        max_tokens=agent.max_tokens
+        max_tokens=agent.max_tokens,
     )
-    DBControl.save_agent(a)
+
     return JSONResponse(
-        content={"message": "Agente criado com sucesso", "agent_id": a.id},
+        content=jsonable_encoder({
+            "message": "Agente criado com sucesso",
+            "agent_id": agent["id"],
+            "agent": agent,
+        }),
         status_code=201
     )
 
 @router.get("/agent")
 async def list_agent():
-   agent =  DBControl.list_agents()
-   return agent
+    agents = SupaBaseAgentDB.list_agents()
+    # converter UUID/datetime pra string se necessário (depende do seu JSON encoder)
+    for a in agents:
+        a["id"] = str(a["id"])
+        if a.get("created_at"): a["created_at"] = a["created_at"].isoformat()
+        if a.get("updated_at"): a["updated_at"] = a["updated_at"].isoformat()
+    return agents
 
 @router.post("/agent/run")
 async def run_agent_endpoint(run_request: AgentRunRequest):

@@ -16,7 +16,7 @@ class AgentRuntime:
         # Ex: {"hello_world": {"func": ..., "schema": ...}, ...}
         all_tools = get_all_tools()
 
-        allowed = set(cfg.tools) 
+        allowed = set(cfg["tools"]) 
 
         tool_functions = []
 
@@ -36,7 +36,7 @@ class AgentRuntime:
 
             tool_functions.append(func)
 
-        print("cfg.tools =", cfg.tools)
+        print("cfg.tools =", cfg["tools"])
 
         print("tools carregadas =", [name for name in all_tools.keys()])
 
@@ -54,11 +54,10 @@ class AgentRuntime:
 
         # 1. Criar LLM
         model = ChatOpenAI(
-            model=cfg.model,
-            temperature=cfg.temperature,
-            max_tokens=cfg.max_tokens,
+            model=cfg["model"],
+            temperature=cfg["temperature"],
+            max_tokens=cfg["max_tokens"],
             api_key=settings.OPENAI_API_KEY,
-
         )
 
         # 2. Carregar tools
@@ -68,7 +67,7 @@ class AgentRuntime:
         agent = create_agent(
             model=model,
             tools=tools,
-            system_prompt=cfg.prompt,
+            system_prompt=cfg["prompt"],
         )
 
         # 4. Executar
