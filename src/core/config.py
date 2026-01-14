@@ -4,7 +4,7 @@ class Settings(BaseSettings):
     """Configurações globais da aplicação."""
     
     APP_NAME: str 
-    APP_VERSION: str="0.3.4"
+    APP_VERSION: str="0.5.3"
     DEBUG: bool = True
     
     OPENAI_API_KEY: str

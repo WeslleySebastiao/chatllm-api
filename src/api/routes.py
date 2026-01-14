@@ -4,8 +4,9 @@ from fastapi.responses import JSONResponse
 import logging
 from src.data.db_control import *
 from src.core.config import settings
-from src.models.agent_models import AgentRequest, AgentResponse, AgentConfig, AgentRunRequest
+from src.models.agent_models import AgentConfig, AgentRunRequest, AgentRunRequestV2
 from src.services.agent import AgentManager
+from src.services.agent_v2 import AgentManagerV2
 from src.mcp.registry import get_all_tools
 from src.data.supaBase_agent_db import SupaBaseAgentDB
 from fastapi.encoders import jsonable_encoder
@@ -55,7 +56,7 @@ async def list_agent():
 
 @router.post("/agent/run")
 async def run_agent_endpoint(run_request: AgentRunRequest):
-    return AgentManager.run_agent(run_request.user_prompt, run_request.id)
+    return AgentManagerV2.run_agent_v2(run_request)
 
 @router.get("/list_tools")
 async def list_tools_endpoint():
@@ -70,3 +71,7 @@ async def list_tools_endpoint():
         })
 
     return {"tools": response}
+
+@router.post("/agent/run/v2")
+async def run_agent_endpoint(run_request: AgentRunRequestV2):
+    return AgentManagerV2.run_agent_v2(run_request)

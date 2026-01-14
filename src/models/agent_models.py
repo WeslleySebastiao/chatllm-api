@@ -20,9 +20,20 @@ class AgentRunRequest(BaseModel):
     user_prompt: str
     id: str
 
+class AgentRunRequestV2(BaseModel):
+    agent_id: str
+    user_id: str
+    session_id: Optional[str] = None
+    message: str
+
 class AgentRequest(BaseModel):
     system: str = "Você é um assistente útil e responde em português."
     prompt: str
 
 class AgentResponse(BaseModel):
     response: str
+
+class AgentResponseV2(BaseModel):
+    session_id: str
+    response: str
+
