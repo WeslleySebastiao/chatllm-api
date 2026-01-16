@@ -1,32 +1,11 @@
-# supaBase_agent_db.py
-import os
 import json
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
-from src.core.config import settings
+from src.data.supaBase_db import DB
 
-load_dotenv()
 
 class SupaBaseAgentDB:
-    """
-    CRUD de configurações de agentes no Supabase/Postgres.
-    Usa Pooler (transaction mode) recomendado no seu cenário.
-    """
-
-    @staticmethod
-    def _get_conn():
-        return psycopg2.connect(
-            user=settings.SUPABASE_DB_USER,
-            password=settings.SUPABASE_DB_PASSWORD,
-            host=settings.SUPABASE_DB_HOST,
-            port=settings.SUPABASE_DB_PORT,
-            dbname=settings.SUPABASE_DB_NAME,
-            sslmode="require",
-        )
 
     @staticmethod
     def create_agent(
@@ -39,72 +18,41 @@ class SupaBaseAgentDB:
         temperature: float,
         max_tokens: int,
     ) -> Dict[str, Any]:
-        conn = SupaBaseAgentDB._get_conn()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        try:
-            cur.execute(
-                """
-                insert into public.agents
-                    (name, description, provider, model, tools, prompt, temperature, max_tokens)
-                values
-                    (%s, %s, %s, %s, %s::jsonb, %s, %s, %s)
-                returning
-                    id, name, description, provider, model, tools, prompt, temperature, max_tokens,
-                    created_at, updated_at;
-                """,
-                (name, description, provider, model, json.dumps(tools), prompt, temperature, max_tokens),
-            )
-            row = cur.fetchone()
-            conn.commit()
-            return row
-        finally:
-            cur.close()
-            conn.close()
+        sql = """
+        insert into public.agents
+            (name, description, provider, model, tools, prompt, temperature, max_tokens)
+        values
+            (%s, %s, %s, %s, %s::jsonb, %s, %s, %s)
+        returning
+            id, name, description, provider, model, tools, prompt, temperature, max_tokens,
+            created_at, updated_at;
+        """
+        return DB.fetch_one(sql, (name, description, provider, model, json.dumps(tools), prompt, temperature, max_tokens))
 
     @staticmethod
     def list_agents() -> List[Dict[str, Any]]:
-        conn = SupaBaseAgentDB._get_conn()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        try:
-            cur.execute(
-                """
-                select
-                    id, name, description, provider, model, tools, prompt, temperature, max_tokens,
-                    created_at, updated_at
-                from public.agents
-                order by created_at desc;
-                """
-            )
-            return cur.fetchall()
-        finally:
-            cur.close()
-            conn.close()
+        sql = """
+        select
+            id, name, description, provider, model, tools, prompt, temperature, max_tokens,
+            created_at, updated_at
+        from public.agents
+        order by created_at desc;
+        """
+        return DB.fetch_all(sql)
 
     @staticmethod
     def get_agent(agent_id: str | UUID) -> Optional[Dict[str, Any]]:
-        connection = SupaBaseAgentDB._get_conn()
-        cur = connection.cursor(cursor_factory=RealDictCursor)
-        try:
-            cur.execute(
-                """
-                select
-                    id, name, description, provider, model, tools, prompt, temperature, max_tokens,
-                    created_at, updated_at
-                from public.agents
-                where id = %s;
-                """,
-                (str(agent_id),),
-            )
-            return cur.fetchone()
-        finally:
-            cur.close()
-            connection.close()
+        sql = """
+        select
+            id, name, description, provider, model, tools, prompt, temperature, max_tokens,
+            created_at, updated_at
+        from public.agents
+        where id = %s;
+        """
+        return DB.fetch_one(sql, (str(agent_id),))
 
     @staticmethod
     def update_agent(agent_id: str | UUID, patch: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Atualização parcial. Ex.: patch={"prompt": "...", "temperature": 0.2, "tools": ["x"]}
-        """
         allowed = {"name", "description", "provider", "model", "prompt", "temperature", "max_tokens", "tools"}
         sets = []
         values = []
@@ -122,37 +70,19 @@ class SupaBaseAgentDB:
         if not sets:
             return SupaBaseAgentDB.get_agent(agent_id)
 
-        conn = SupaBaseAgentDB._get_conn()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        try:
-            values.append(str(agent_id))
-            cur.execute(
-                f"""
-                update public.agents
-                set {", ".join(sets)}
-                where id = %s
-                returning
-                    id, name, description, provider, model, tools, prompt, temperature, max_tokens,
-                    created_at, updated_at;
-                """,
-                tuple(values),
-            )
-            row = cur.fetchone()
-            conn.commit()
-            return row
-        finally:
-            cur.close()
-            conn.close()
+        sql = f"""
+        update public.agents
+        set {", ".join(sets)}
+        where id = %s
+        returning
+            id, name, description, provider, model, tools, prompt, temperature, max_tokens,
+            created_at, updated_at;
+        """
+        values.append(str(agent_id))
+        return DB.fetch_one(sql, tuple(values))
 
     @staticmethod
     def delete_agent(agent_id: str | UUID) -> bool:
-        conn = SupaBaseAgentDB._get_conn()
-        cur = conn.cursor()
-        try:
-            cur.execute("delete from public.agents where id = %s;", (str(agent_id),))
-            deleted = cur.rowcount > 0
-            conn.commit()
-            return deleted
-        finally:
-            cur.close()
-            conn.close()
+        sql = "delete from public.agents where id = %s;"
+        rows = DB.execute(sql, (str(agent_id),))
+        return rows > 0

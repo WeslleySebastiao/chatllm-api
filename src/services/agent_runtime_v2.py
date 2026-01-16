@@ -92,7 +92,14 @@ class AgentRuntimeV2:
             state = agent.invoke({"messages": messages})
         invoke_ms = int((time.perf_counter() - invoke_start) * 1000)
 
-        print(f"{cb}")
+        usage = {
+            "prompt_tokens": cb.prompt_tokens,
+            "completion_tokens": cb.completion_tokens,
+            "total_tokens": cb.total_tokens,
+            "cost_usd": float(getattr(cb, "total_cost", 0.0) or 0.0),
+            "invoke_ms": invoke_ms,
+            "model": cfg["model"],
+        }
         
         #Pegar resposta final
         messages = state.get("messages", [])
@@ -102,4 +109,4 @@ class AgentRuntimeV2:
         SupaBaseMemoryDB.save_message(session_id, "assistant", final_msg)
 
 
-        return {"session_id": session_id, "answer": final_msg}
+        return {"session_id": session_id, "answer": final_msg, "usage": usage}
