@@ -1,8 +1,10 @@
 import inspect
+import time
 from src.mcp.registry import get_all_tools
 from src.core.config import settings
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
+from langchain_community.callbacks import get_openai_callback
 from src.data.supaBase_memory_db import SupaBaseMemoryDB 
 class AgentRuntimeV2:
 
@@ -85,8 +87,20 @@ class AgentRuntimeV2:
         messages = [{"role": m["role"], "content": m["content"]} for m in history]
 
         #V2 Executar
-        state = agent.invoke({"messages": messages})
+        invoke_start = time.perf_counter()
+        with get_openai_callback() as cb:
+            state = agent.invoke({"messages": messages})
+        invoke_ms = int((time.perf_counter() - invoke_start) * 1000)
 
+        usage = {
+            "prompt_tokens": cb.prompt_tokens,
+            "completion_tokens": cb.completion_tokens,
+            "total_tokens": cb.total_tokens,
+            "cost_usd": float(getattr(cb, "total_cost", 0.0) or 0.0),
+            "invoke_ms": invoke_ms,
+            "model": cfg["model"],
+        }
+        
         #Pegar resposta final
         messages = state.get("messages", [])
         final_msg = messages[-1].content if messages else ""
@@ -95,4 +109,4 @@ class AgentRuntimeV2:
         SupaBaseMemoryDB.save_message(session_id, "assistant", final_msg)
 
 
-        return {"session_id": session_id, "answer": final_msg}
+        return {"session_id": session_id, "answer": final_msg, "usage": usage}
