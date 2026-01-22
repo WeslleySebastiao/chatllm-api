@@ -108,7 +108,7 @@ Acesse: **[http://localhost:8080/docs](http://localhost:8080/docs)**
 
 
 
-### 📕 Documentação Alternativa (ReDoc)
+### 📕 Documentação Alternativa
 
 O FastAPI também fornece um segundo estilo de documentação.
 
