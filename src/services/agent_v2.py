@@ -56,7 +56,7 @@ class AgentManagerV2:
                 session_id=run_request.session_id,
                 model=cfg.get("model"),
             )
-            return {"error": f"Agent execution error: {e}", "agent_id": id}
+            return {"error": f"Agent execution error: {e}", "agent_id": run_request.agent_id}
         
         usage = final_output.get("usage") or {}
         finish_run_success(
