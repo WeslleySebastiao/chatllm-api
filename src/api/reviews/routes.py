@@ -20,8 +20,8 @@ def _require_api_key(authorization: str | None):
 @router_review.post("/pr/run", response_model=PRReviewRunResponse)
 async def pr_run(
     payload: PRReviewRunRequest,
-    authorization: str | None = Header(default=None),
-    x_github_token: str | None = Header(default=None),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_github_token: str | None = Header(default=None, alias="X-GitHub-Token"),
 ):
 
     _require_api_key(authorization)
