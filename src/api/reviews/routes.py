@@ -13,15 +13,15 @@ def _require_api_key(authorization: str | None):
         raise HTTPException(status_code=401, detail="Missing Authorization Bearer token")
 
     token = authorization.removeprefix("Bearer ").strip()
-    if token != setting.API_KEY:
+    if token != Settings.API_KEY:
         raise HTTPException(status_code=401, detail="Authorization Bearer token do not match")
 
 
 @router_review.post("/pr/run", response_model=PRReviewRunResponse)
 async def pr_run(
     payload: PRReviewRunRequest,
-    authorization: str | None = Header(default=None),
-    x_github_token: str | None = Header(default=None),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_github_token: str | None = Header(default=None, alias="X-GitHub-Token"),
 ):
 
     _require_api_key(authorization)
