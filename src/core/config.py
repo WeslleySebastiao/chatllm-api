@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     MODEL_NAME: str 
     FRONT_URL: str
-
+    API_KEY: str
     SUPABASE_DB_USER : str
     SUPABASE_DB_PASSWORD : str
     SUPABASE_DB_HOST : str
