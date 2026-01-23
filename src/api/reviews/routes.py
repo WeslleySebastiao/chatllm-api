@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Depends
+from fastapi.security import HTTPAuthorizationCredentials
 from src.models.reviews.reviews_schemas import PRReviewRunRequest, PRReviewRunResponse
 from src.services.reviews.pipeline.graph import build_review_graph
 from src.core.config import *
@@ -20,11 +21,13 @@ def _require_api_key(authorization: str | None):
 @router_review.post("/pr/run", response_model=PRReviewRunResponse)
 async def pr_run(
     payload: PRReviewRunRequest,
-    authorization: str | None = Header(default=None, alias="Authorization"),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     x_github_token: str | None = Header(default=None, alias="X-GitHub-Token"),
 ):
 
-    _require_api_key(authorization)
+    token = credentials.credentials
+    if token != Settings.API_KEY:
+        raise HTTPException(status_code=401, detail="Authorization Bearer token do not match")
     
     if not x_github_token:
         raise HTTPException(status_code=400, detail="Missing X-GitHub-Token header")
