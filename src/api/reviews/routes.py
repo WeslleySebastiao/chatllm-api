@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from src.models.reviews.reviews_schemas import PRReviewRunRequest, PRReviewRunResponse
 from src.services.reviews.pipeline.graph import build_review_graph
 from src.core.config import *
@@ -7,6 +8,7 @@ from src.core.config import *
 router_review = APIRouter(prefix="/api/v1/reviews", tags=["reviews"])
 
 graph = build_review_graph()
+security = HTTPBearer()
 
 def _require_api_key(authorization: str | None):
     if not authorization or not authorization.startswith("Bearer "):
