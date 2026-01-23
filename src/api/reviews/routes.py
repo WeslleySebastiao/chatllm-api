@@ -13,7 +13,7 @@ def _require_api_key(authorization: str | None):
         raise HTTPException(status_code=401, detail="Missing Authorization Bearer token")
 
     token = authorization.removeprefix("Bearer ").strip()
-    if token != setting.API_KEY:
+    if token != Settings.API_KEY:
         raise HTTPException(status_code=401, detail="Authorization Bearer token do not match")
 
 
