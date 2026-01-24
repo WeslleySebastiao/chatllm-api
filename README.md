@@ -1,7 +1,7 @@
 # 🚀 ChatLLM API
 Autor: Weslley da Costa Sebastião
 
-> Esta API orquestra o ciclo de vida (registro e execução) de agentes personalizados, permitindo que eles acessem tools hospedadas localmente no projeto (via pasta `src/mcp/tools`) ou, de forma opcional, um servidor MCP externo.
+> Esta API orquestra o ciclo de vida (registro e execução) de agentes personalizados, permitindo que eles acessem ferramentas hospedadas localmente no projeto (via pasta `src/mcp/tools`) ou, de forma opcional, um servidor MCP externo.
 
 Este serviço atua como uma central de orquestração para agentes de LLM. Ele simplifica o gerenciamento do ciclo completo, desde o registro e a gestão dos agentes até a execução final, incluindo memória conversacional e telemetria de uso. O projeto também inclui um pipeline de **code review automático** para Pull Requests (PR) e endpoints de dashboard para análise de métricas.
 
@@ -15,12 +15,9 @@ Este serviço atua como uma central de orquestração para agentes de LLM. Ele s
 - [Estrutura de pastas](#-estrutura-de-pastas)
 - [Requisitos](#-requisitos)
 - [Configuração (.env)](#-configuração-env)
-- [Como rodar](#-como-rodar)
+- [Instalação e execução](#-instalação-e-execução)
 - [Documentação da API](#-documentação-da-api)
-  - [Endpoints principais](#endpoints-principais)
-  - [Endpoints de dashboard](#endpoints-de-dashboard)
-  - [Endpoints de reviews de PR](#endpoints-de-reviews-de-pr)
-- [MCP Tools](#-mcp-tools)
+- [Ferramentas MCP](#-ferramentas-mcp)
 - [Telemetria e memória](#-telemetria-e-memória)
 - [Problemas comuns](#-problemas-comuns)
 
@@ -30,7 +27,7 @@ Este serviço atua como uma central de orquestração para agentes de LLM. Ele s
 
 O ChatLLM API fornece:
 
-- **Cadastro de agentes** com prompt, modelo e lista de tools permitidas.
+- **Cadastro de agentes** com prompt, modelo e lista de ferramentas permitidas.
 - **Execução de agentes** com memória conversacional e rastreamento de custo/uso.
 - **Integração com MCP** (local via arquivos ou servidor externo).
 - **Pipeline de reviews de PR**, que executa análises automáticas e registra resultados em banco.
@@ -58,7 +55,7 @@ O ChatLLM API fornece:
 ### 2) Execução
 - O endpoint `POST /agent/run/v2`:
   1. Carrega a configuração do agente.
-  2. Carrega tools permitidas.
+  2. Carrega ferramentas permitidas.
   3. Executa o agente usando LangChain.
   4. Registra telemetria, tokens e custo.
 
@@ -83,7 +80,7 @@ O ChatLLM API fornece:
     │   └── reviews              # Endpoints de review de PR
     ├── core                     # Configuração e logging
     ├── data                     # Persistência (Supabase/Postgres)
-    ├── mcp                      # Loader/registry e tools locais
+    ├── mcp                      # Loader/registry e ferramentas locais
     ├── models                   # Schemas Pydantic
     ├── services                 # Lógicas de execução de agentes e reviews
     └── utils                    # Logs, helpers, telemetria
@@ -109,25 +106,26 @@ APP_NAME="ChatLLM API"
 APP_VERSION="0.6.0"
 DEBUG=True
 
-OPENAI_API_KEY="sk-..."
-MODEL_NAME="gpt-4o-mini"
+OPENAI_API_KEY="<defina-sua-chave-openai>"
+MODEL_NAME="<modelo-padrão>"
 FRONT_URL="http://localhost:3000"
-API_KEY="sua-chave-de-api"
+API_KEY="<defina-uma-chave-segura>"
 
-SUPABASE_DB_USER="postgres"
-SUPABASE_DB_PASSWORD="senha"
-SUPABASE_DB_HOST="db.xxxxx.supabase.co"
+SUPABASE_DB_USER="<usuario>"
+SUPABASE_DB_PASSWORD="<senha>"
+SUPABASE_DB_HOST="<host>"
 SUPABASE_DB_PORT=5432
-SUPABASE_DB_NAME="postgres"
+SUPABASE_DB_NAME="<database>"
 ```
 
 > ℹ️ **Notas**
 > - `MODEL_NAME` é usado como fallback/valor padrão na aplicação.
 > - `API_KEY` protege o endpoint de review de PR.
+> - Não versione credenciais reais no repositório; use um `.env` local ou variáveis de ambiente seguras.
 
 ---
 
-## ▶️ Como rodar
+## ▶️ Instalação e execução
 
 1) **Clone o repositório**
 ```bash
@@ -177,9 +175,7 @@ A documentação alternativa (ReDoc):
 Resposta:
 ```json
 {
-  "status": "ok",
-  "app": "ChatLLM API",
-  "version": "0.6.0"
+  "status": "ok"
 }
 ```
 
@@ -206,8 +202,7 @@ Resposta:
 ```json
 {
   "message": "Agente criado com sucesso",
-  "agent_id": "uuid",
-  "agent": {"...": "..."}
+  "agent_id": "uuid"
 }
 ```
 
@@ -221,9 +216,7 @@ Resposta (exemplo):
 [
   {
     "id": "uuid",
-    "name": "Agente Suporte",
-    "model": "gpt-4o-mini",
-    "created_at": "2024-01-01T00:00:00Z"
+    "name": "Agente Suporte"
   }
 ]
 ```
@@ -260,7 +253,7 @@ Resposta:
 
 ---
 
-#### 🧰 Listar tools disponíveis
+#### 🧰 Listar ferramentas disponíveis
 **GET `/list_tools`**
 
 Resposta:
@@ -268,8 +261,7 @@ Resposta:
 {
   "tools": [
     {
-      "name": "hello_world",
-      "schema": {"description": "...", "parameters": {...}}
+      "name": "hello_world"
     }
   ]
 }
@@ -323,11 +315,7 @@ Resposta:
 {
   "repo_full_name": "WeslleySebastiao/chatllm-api",
   "pr_number": 12,
-  "head_sha": "abc123",
-  "result": {
-    "summary": "...",
-    "findings": []
-  }
+  "result": {}
 }
 ```
 
@@ -373,18 +361,18 @@ Query:
 
 ---
 
-## 🧩 MCP Tools
+## 🧩 Ferramentas MCP
 
-As tools locais ficam em:
+As ferramentas locais ficam em:
 ```
-src/mcp/tools/<nome_da_tool>/
+src/mcp/tools/<nome_da_ferramenta>/
 ├── function.py
 └── schema.json
 ```
 
-Ao iniciar o servidor, o loader registra automaticamente todas as tools encontradas nessa pasta. Para adicionar uma nova tool:
+Ao iniciar o servidor, o loader registra automaticamente todas as ferramentas encontradas nessa pasta. Para adicionar uma nova ferramenta:
 
-1. Crie uma pasta com o nome da tool.
+1. Crie uma pasta com o nome da ferramenta.
 2. Adicione `function.py` com a função principal.
 3. Adicione `schema.json` com `description` e `parameters`.
 
