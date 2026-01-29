@@ -2,11 +2,10 @@ from langchain_openai import ChatOpenAI
 # Para o Agente
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
-from src.data.db_control import DBControl
 from src.models.agent_models import AgentConfig, AgentRunRequestV2
 from src.services.agent_runtime_v2 import AgentRuntimeV2
 from src.mcp.registry import get_all_tools
-from src.data.supaBase_agent_db import SupaBaseAgentDB
+from src.data.supaBase.supaBase_agent_db import SupaBaseAgentDB
 from src.utils.log import start_run, finish_run_error, finish_run_success
 import os
 
@@ -20,14 +19,14 @@ class AgentManagerV2:
             agent_id=run_request.agent_id,
             user_id=run_request.user_id,
             session_id=run_request.session_id,
-            agent_version=None,  # se você tiver
-            model=None,          # vai preencher depois
+            agent_version=None,  
+            model=None,    
             metadata={
                 "route": "/agent/run/v2",
             },
         )
 
-        # 1. Carrega a config persistida do agente
+    
         try:
             cfg = SupaBaseAgentDB.get_agent(run_request.agent_id)
         except Exception as e:
@@ -40,7 +39,7 @@ class AgentManagerV2:
             )
             return {"error": f"Failed to load agent config: {e}", "agent_id": id}
 
-        # 2. Executa o agente usando o runtime cognitivo
+    
         try:
             final_output = AgentRuntimeV2.run_v2(user_prompt = run_request.message, 
                                                 cfg=cfg, 

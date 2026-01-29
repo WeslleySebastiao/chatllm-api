@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 from typing import Optional
 
-from src.data.supaBase_db import DB  # seu core DB
+from src.data.supaBase.supaBase_db import DB  # seu core DB
 
 router_view = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 

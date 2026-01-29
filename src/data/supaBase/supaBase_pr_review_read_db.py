@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional
-from src.data.supaBase_db import DB
+from src.data.supaBase.supaBase_db import DB
 
 
 class SupaBasePRReviewReadDB:
