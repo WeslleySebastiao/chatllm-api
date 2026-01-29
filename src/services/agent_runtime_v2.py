@@ -37,13 +37,6 @@ class AgentRuntimeV2:
                     func.__doc__ = schema["description"]
 
             tool_functions.append(func)
-
-        print("cfg.tools =", cfg["tools"])
-
-        print("tools carregadas =", [name for name in all_tools.keys()])
-
-        print("tools finais =", tool_functions)
-
         return tool_functions
 
 
@@ -54,16 +47,15 @@ class AgentRuntimeV2:
         Executa um agente LangChain baseado na configuração (cfg) e input.
         """
 
-        #Teste incial da sessão
         session_id = SupaBaseMemoryDB.get_or_create_session(
             user_id=user_id,
             agent_id=agent_id,
             session_id=session_id,
         )
 
-        # 1) salvar msg do user
+
         SupaBaseMemoryDB.save_message(session_id, "user", user_prompt)
-        # 2) carregar histórico
+
         history = SupaBaseMemoryDB.load_history(session_id, limit=history_limit)
 
         #Criar LLM
@@ -86,7 +78,6 @@ class AgentRuntimeV2:
 
         messages = [{"role": m["role"], "content": m["content"]} for m in history]
 
-        #V2 Executar
         invoke_start = time.perf_counter()
         with get_openai_callback() as cb:
             state = agent.invoke({"messages": messages})

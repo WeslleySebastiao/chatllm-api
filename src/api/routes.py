@@ -33,14 +33,11 @@ async def create_agent(agent: AgentConfig):
         max_tokens=agent.max_tokens,
     )
 
-    return JSONResponse(
-        content=jsonable_encoder({
+    return {
             "message": "Agente criado com sucesso",
             "agent_id": agent["id"],
             "agent": agent,
-        }),
-        status_code=201
-    )
+        }
 
 @router.get("/agent")
 async def list_agent():
