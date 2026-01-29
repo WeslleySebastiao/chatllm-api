@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Optional
 from psycopg2.extras import Json
-from src.data.supaBase_db import DB
+from src.data.supaBase.supaBase_db import DB
 
 
 class SupaBasePRReviewDB:

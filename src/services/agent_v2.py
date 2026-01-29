@@ -6,7 +6,7 @@ from src.data.db_control import DBControl
 from src.models.agent_models import AgentConfig, AgentRunRequestV2
 from src.services.agent_runtime_v2 import AgentRuntimeV2
 from src.mcp.registry import get_all_tools
-from src.data.supaBase_agent_db import SupaBaseAgentDB
+from src.data.supaBase.supaBase_agent_db import SupaBaseAgentDB
 from src.utils.log import start_run, finish_run_error, finish_run_success
 import os
 

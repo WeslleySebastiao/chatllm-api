@@ -1,7 +1,7 @@
 # src/db/runs_repo.py
 from typing import Any, Dict, Optional
 from psycopg2.extras import Json
-from src.data.supaBase_db import DB
+from src.data.supaBase.supaBase_db import DB
 
 
 class SupaBaseRunsDB:

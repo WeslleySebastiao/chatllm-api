@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from src.data.supaBase_db import DB
+from src.data.supaBase.supaBase_db import DB
 
 
 class SupaBaseAgentDB:

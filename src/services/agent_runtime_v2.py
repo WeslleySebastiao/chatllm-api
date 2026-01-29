@@ -5,7 +5,7 @@ from src.core.config import settings
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain_community.callbacks import get_openai_callback
-from src.data.supaBase_memory_db import SupaBaseMemoryDB 
+from src.data.supaBase.supaBase_memory_db import SupaBaseMemoryDB 
 class AgentRuntimeV2:
 
     @staticmethod

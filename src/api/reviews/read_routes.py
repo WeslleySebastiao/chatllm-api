@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from src.data.supaBase_pr_review_read_db import SupaBasePRReviewReadDB
+from src.data.supaBase.supaBase_pr_review_read_db import SupaBasePRReviewReadDB
 
 router_reviews_read = APIRouter(prefix="/api/v1/reviews", tags=["reviews-read"])
 

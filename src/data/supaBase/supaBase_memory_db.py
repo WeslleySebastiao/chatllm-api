@@ -1,6 +1,6 @@
 # src/db/memory_repo.py
 from typing import List, Dict, Any, Optional
-from src.data.supaBase_db import DB
+from src.data.supaBase.supaBase_db import DB
 
 
 class SupaBaseMemoryDB:

@@ -1,5 +1,5 @@
 from src.services.reviews.pipeline.state import ReviewState
-from src.data.supaBase_pr_review_db import SupaBasePRReviewDB
+from src.data.supaBase.supaBase_pr_review_db import SupaBasePRReviewDB
 from src.services.reviews.normalize import normalize_findings
 
 def _extract_agents_executed(state: ReviewState) -> list[str]:
