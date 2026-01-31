@@ -3,7 +3,7 @@ import time, uuid, hashlib
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from src.data.supaBase.supaBase_log_db import SupaBaseRunsDB  # <- novo repo (psycopg2)
+from src.data.supaBase.supaBase_log_db import SupaBaseRunsDB
 
 def now_utc():
     return datetime.now(timezone.utc).isoformat()

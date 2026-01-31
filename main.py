@@ -50,9 +50,9 @@ app.include_router(router_view)
 app.include_router(router_review)
 app.include_router(router_reviews_read)
 @app.get("/")
-def read_root():
-    """Rota raiz da API."""
-    return {"message": f"Welcome to {settings.APP_NAME}!"}
+def health():
+    """Verifica se a API está viva"""
+    return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8080)
