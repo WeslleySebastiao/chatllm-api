@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from src.models.reviews.reviews_schemas import PRReviewRunRequest, PRReviewRunResponse
 from src.services.reviews.pipeline.graph import build_review_graph
-from src.core.config import settings  # prefira importar explícito
+from src.core.config import settings
 
 router_review = APIRouter(prefix="/api/v1/reviews", tags=["reviews"])
 graph = build_review_graph()

@@ -70,6 +70,8 @@ class SupaBaseAgentDB:
         if not sets:
             return SupaBaseAgentDB.get_agent(agent_id)
 
+        sets.append("updated_at = now()")
+
         sql = f"""
         update public.agents
         set {", ".join(sets)}

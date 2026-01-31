@@ -1,24 +1,15 @@
-from fastapi import APIRouter, Depends, Request
-import asyncio
-from fastapi.responses import JSONResponse
-import logging
+from fastapi import APIRouter
+from fastapi import HTTPException
+from uuid import UUID
 from src.core.config import settings
-from src.models.agent_models import AgentConfig, AgentRunRequest, AgentRunRequestV2
+from src.models.agent_models import AgentConfig, AgentRunRequest, AgentRunRequestV2, AgentUpdate
 from src.services.agent_v2 import AgentManagerV2
 from src.mcp.registry import get_all_tools
 from src.data.supaBase.supaBase_agent_db import SupaBaseAgentDB
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
+router = APIRouter(tags=['Agent Operation'])
 
-logger = logging.getLogger(__name__)
-router = APIRouter()
-
-@router.get("/health")
-def health():
-    """Verifica se a API está viva"""
-    logger.info("Verificação de saúde OK.")
-    return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 @router.post("/agent")
 async def create_agent(agent: AgentConfig):
@@ -38,6 +29,53 @@ async def create_agent(agent: AgentConfig):
             "agent_id": agent["id"],
             "agent": agent,
         }
+
+@router.patch("/agent/{agent_id}")
+async def update_agent(agent_id: UUID, payload: AgentUpdate):
+    existing = SupaBaseAgentDB.get_agent(agent_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Agente não encontrado")
+
+    patch = payload.model_dump(exclude_unset=True)
+
+    if not patch:
+        return {
+            "message": "Nenhum campo enviado para atualização",
+            "agent": jsonable_encoder(existing),
+        }
+
+    updated = SupaBaseAgentDB.update_agent(agent_id, patch)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Agente não encontrado")
+
+    return {
+        "message": "Agente atualizado com sucesso",
+        "agent": jsonable_encoder(updated),
+    }
+
+@router.delete("/agent/{agent_id}", status_code=204)
+async def delete_agent(agent_id: UUID):
+    deleted = SupaBaseAgentDB.delete_agent(agent_id)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Agente não encontrado")
+
+    return
+
+@router.get("/agent/{agent_id}")
+async def list_especific_agent(agent_id: UUID):
+    agent = SupaBaseAgentDB.get_agent(agent_id)
+
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    agent["id"] = str(agent["id"])
+    if agent.get("created_at"):
+        agent["created_at"] = agent["created_at"].isoformat()
+    if agent.get("updated_at"):
+        agent["updated_at"] = agent["updated_at"].isoformat()
+
+    return agent
 
 @router.get("/agent")
 async def list_agent():
