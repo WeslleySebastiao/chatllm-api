@@ -11,9 +11,9 @@ from src.api.reviews.read_routes import router_reviews_read
 from src.api.routes import router
 from src.api.DashboardViews.routes import router_view
 from src.api.reviews.execution_routes import router_review
-
 from src.mcp.loader import load_all_tools
 import os
+from src.mcp.registry import get_all_tools
 
 # Configura logs
 setup_logging()
@@ -24,6 +24,7 @@ async def lifespan(app: FastAPI):
     logger.info('Server Initializer')
     logger.info('Loading tools')
     load_all_tools()
+    print("TOOLS:", list(get_all_tools().keys()))
     logger.info('Tool loaded')
     yield
     logger.info('Shutdown Complete')
@@ -49,6 +50,7 @@ app.include_router(router)
 app.include_router(router_view)
 app.include_router(router_review)
 app.include_router(router_reviews_read)
+
 @app.get("/")
 def health():
     """Verifica se a API está viva"""

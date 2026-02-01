@@ -107,4 +107,4 @@ async def list_tools_endpoint():
 
 @router.post("/agent/run/v2")
 async def run_agent_endpoint(run_request: AgentRunRequestV2):
-    return AgentManagerV2.run_agent_v2(run_request)
+    return await AgentManagerV2.run_agent_v2(run_request)

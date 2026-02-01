@@ -1,6 +1,6 @@
 import inspect
 import time
-from src.mcp.registry import get_all_tools
+from src.mcp.registry import get_tools_by_names
 from src.core.config import settings
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
@@ -8,41 +8,16 @@ from langchain_community.callbacks import get_openai_callback
 from src.data.supaBase.supaBase_memory_db import SupaBaseMemoryDB 
 class AgentRuntimeV2:
 
+
     @staticmethod
     def _load_tools_for_agent_v2(cfg):
-        """
-        Carrega as tools do MCP que estão permitidas na config do agente.
-        Retorna uma lista de funções Python configuradas para o LangChain.
-        """
-
-        # Ex: {"hello_world": {"func": ..., "schema": ...}, ...}
-        all_tools = get_all_tools()
-
-        allowed = set(cfg["tools"]) 
-
-        tool_functions = []
-
-        for name, data in all_tools.items():
-
-            # ignorar tools não permitidas na config
-            if name not in allowed:
-                continue
-
-            func = data.get("func")
-            schema = data.get("schema")
-
-            # Se houver "description" no schema.json, injeta como docstring
-            if schema and "description" in schema:
-                if not inspect.getdoc(func):
-                    func.__doc__ = schema["description"]
-
-            tool_functions.append(func)
-        return tool_functions
+        allowed = cfg.get("tools", [])
+        return get_tools_by_names(allowed)
 
 
 
     @staticmethod
-    def run_v2(user_prompt: str, cfg, user_id: str, agent_id: str, session_id: str | None = None, history_limit: int = 20):
+    async def run_v2(user_prompt: str, cfg, user_id: str, agent_id: str, session_id: str | None = None, history_limit: int = 20):
         """
         Executa um agente LangChain baseado na configuração (cfg) e input.
         """
@@ -80,7 +55,7 @@ class AgentRuntimeV2:
 
         invoke_start = time.perf_counter()
         with get_openai_callback() as cb:
-            state = agent.invoke({"messages": messages})
+            state = await agent.ainvoke({"messages": messages})
         invoke_ms = int((time.perf_counter() - invoke_start) * 1000)
 
         usage = {
