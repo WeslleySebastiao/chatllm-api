@@ -7,6 +7,7 @@ from src.services.agent_v2 import AgentManagerV2
 from src.mcp.registry import get_all_tools
 from src.data.supaBase.supaBase_agent_db import SupaBaseAgentDB
 from fastapi.encoders import jsonable_encoder
+from src.mcp.request_context import set_request_context, RequestContext
 
 router = APIRouter(tags=['Agent Operation'])
 
@@ -94,17 +95,17 @@ async def run_agent_endpoint(run_request: AgentRunRequest):
 @router.get("/list_tools")
 async def list_tools_endpoint():
     tools = get_all_tools()
-
-    
     response = []
-    for name, data in tools.items():
+    for name, tool in tools.items():
         response.append({
             "name": name,
-            "schema": data["schema"],  # schema da tool (JSON)
+            "description": getattr(tool, "description", None),
+            "args_schema": tool.args_schema.model_json_schema() if getattr(tool, "args_schema", None) else None,
         })
-
     return {"tools": response}
+
 
 @router.post("/agent/run/v2")
 async def run_agent_endpoint(run_request: AgentRunRequestV2):
+    set_request_context(RequestContext(user_id=str(run_request.user_id)))
     return await AgentManagerV2.run_agent_v2(run_request)

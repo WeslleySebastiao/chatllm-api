@@ -11,7 +11,7 @@ async def _run(name: str) -> str:
 
 
 TOOL = StructuredTool.from_function(
-    name="hello_world",  # <- ESTE é o nome que vai no cfg["tools"]
+    name="hello_world",
     description="Retorna uma saudação personalizada.",
     args_schema=HelloArgs,
     coroutine=_run,
