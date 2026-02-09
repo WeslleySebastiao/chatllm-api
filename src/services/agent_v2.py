@@ -13,7 +13,7 @@ import os
 class AgentManagerV2:
 
     @staticmethod
-    def run_agent_v2(run_request: AgentRunRequestV2) -> dict:
+    async def run_agent_v2(run_request: AgentRunRequestV2) -> dict:
 
         run_ctx = start_run(
             agent_id=run_request.agent_id,
@@ -41,7 +41,7 @@ class AgentManagerV2:
 
     
         try:
-            final_output = AgentRuntimeV2.run_v2(user_prompt = run_request.message, 
+            final_output = await AgentRuntimeV2.run_v2(user_prompt = run_request.message, 
                                                 cfg=cfg, 
                                                 user_id=run_request.user_id, 
                                                 agent_id=run_request.agent_id, 

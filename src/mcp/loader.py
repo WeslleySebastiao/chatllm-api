@@ -1,36 +1,37 @@
 import importlib
-import json
-import os
 from pathlib import Path
-from . .mcp.registry import register_tool
+from src.mcp.registry import register_tool
 
 TOOLS_DIR = Path(__file__).parent / "tools"
 
+
 def load_all_tools():
-    for tool_dir in TOOLS_DIR.iterdir():
-        if not tool_dir.is_dir():
-            continue
-        
-        func_path = tool_dir / "function.py"
-        schema_path = tool_dir / "schema.json"
+    """
+    Carrega tools determinísticamente:
+    - Cada subpasta em src/mcp/tools é um "grupo" (ex: financial_tools)
+    - Dentro do grupo, carrega todos os .py (exceto __init__.py e _*.py)
+    - Cada arquivo deve exportar TOOL (BaseTool/StructuredTool)
+    """
 
-        if not func_path.exists() or not schema_path.exists():
-            continue
-
-        module_name = f"src.mcp.tools.{tool_dir.name}.function"
-        module = importlib.import_module(module_name)
-
-        # Pega a primeira função pública
-        func = next(
-            (getattr(module, attr) for attr in dir(module)
-             if not attr.startswith("_") and callable(getattr(module, attr))),
-            None
+    for tool_dir in sorted([p for p in TOOLS_DIR.iterdir() if p.is_dir()], key=lambda p: p.name):
+        # Ordena arquivos para determinismo
+        py_files = sorted(
+            [f for f in tool_dir.glob("*.py") if f.is_file() and f.name != "__init__.py" and not f.name.startswith("_")],
+            key=lambda f: f.name,
         )
 
-        if func is None:
-            continue
+        for py_file in py_files:
+            module_name = f"src.mcp.tools.{tool_dir.name}.{py_file.stem}"
 
-        with open(schema_path, "r", encoding="utf-8") as f:
-            schema = json.load(f)
+            try:
+                module = importlib.import_module(module_name)
+            except Exception as e:
+                print(f"[TOOLS] Erro ao importar {module_name}: {type(e).__name__}: {e}")
+                continue
 
-        register_tool(tool_dir.name, func, schema)
+            tool_obj = getattr(module, "TOOL", None)
+            if tool_obj is None:
+                continue
+
+            register_tool(tool_obj)
+            print(f"[TOOLS] Registrada: {tool_obj.name} ({module_name})")
