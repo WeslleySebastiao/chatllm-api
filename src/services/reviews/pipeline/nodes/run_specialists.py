@@ -42,7 +42,7 @@ async def run_specialists(state: ReviewState) -> dict:
         )
 
         # roda o agente sem bloquear o event loop
-        raw = await run_in_threadpool(AgentManagerV2.run_agent_v2, run_req)
+        raw = await AgentManagerV2.run_agent_v2(run_req)
 
         print("RAW_AGENT_OUTPUT =", raw)  # <-- debug
         text = raw.get("response", "")
