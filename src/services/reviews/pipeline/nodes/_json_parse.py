@@ -3,46 +3,41 @@ import re
 
 def safe_parse_json(text: str) -> dict:
     if not text:
-        return {
-            "agent": "parse_error",
-            "findings": [{
-                "severity": "MAJOR",
-                "title": "Empty agent output",
-                "file": "",
-                "line_range": "",
-                "evidence": "Model returned empty string",
-                "recommendation": "Verificar logs do runtime e prompt.",
-                "confidence": 1.0
-            }],
-            "tests_suggested": []
-        }
+        return _build_error("Empty input")
 
-    cleaned = text.strip()
-
-    # Remove fences ```json ... ``` ou ``` ... ```
-    if cleaned.startswith("```"):
-        cleaned = re.sub(r"^```[a-zA-Z]*\s*", "", cleaned)
-        cleaned = re.sub(r"\s*```$", "", cleaned).strip()
-
-    # Se ainda tiver texto extra, tenta extrair o primeiro objeto JSON { ... }
-    if not cleaned.startswith("{"):
-        m = re.search(r"\{.*\}", cleaned, flags=re.DOTALL)
-        if m:
-            cleaned = m.group(0).strip()
-
+    # Tenta parsear direto primeiro (caso ideal)
     try:
-        return json.loads(cleaned)
-    except Exception as e:
-        return {
-            "agent": "parse_error",
-            "findings": [{
-                "severity": "MAJOR",
-                "title": "Agent output is not valid JSON",
-                "file": "",
-                "line_range": "",
-                "evidence": f"JSON parse error: {e}. Output prefix: {text[:200]}",
-                "recommendation": "Ajustar prompt do agente para retornar SOMENTE JSON válido e sem markdown.",
-                "confidence": 1.0
-            }],
-            "tests_suggested": []
-        }
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # ESTRATÉGIA ROBUSTA: Encontrar o JSON delimitado
+    # Procura desde o primeiro '{' até o último '}'
+    # O flag DOTALL permite que o ponto (.) case com quebras de linha
+    match = re.search(r"(\{.*\})", text, re.DOTALL)
+    
+    if match:
+        json_candidate = match.group(1).strip()
+        try:
+            return json.loads(json_candidate)
+        except json.JSONDecodeError:
+            # Se falhar aqui, o JSON interno pode estar malformado
+            pass
+    
+    # Se chegou aqui, falhou totalmente
+    return _build_error(f"Failed to parse JSON. Raw content prefix: {text[:200]}")
+
+def _build_error(msg: str) -> dict:
+    return {
+        "agent": "parse_error",
+        "findings": [{
+            "severity": "MAJOR",
+            "title": "JSON Parse Error",
+            "file": "",
+            "line_range": "",
+            "evidence": msg,
+            "recommendation": "Check model output format.",
+            "confidence": 1.0
+        }],
+        "tests_suggested": []
+    }
