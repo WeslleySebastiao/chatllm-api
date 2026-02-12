@@ -302,3 +302,218 @@ class SupaBaseFinanceDB:
             (_uuid(user_id), _uuid(card_id), ref_month_start, int(limit), int(offset)),
         )
         return [dict(r) for r in rows]
+
+    @staticmethod
+    def create_account(
+        user_id: str,
+        name: str,
+        type: str = "checking",
+        starting_balance_cents: int = 0,
+        currency: str = "BRL",
+    ) -> dict:
+        sql = """
+        insert into public.finance_accounts
+            (user_id, name, type, starting_balance_cents, currency)
+        values
+            (%s, %s, %s, %s, %s)
+        returning
+            id, user_id, name, type, starting_balance_cents, currency, created_at;
+        """
+        row = DB.fetch_one(sql, (user_id, name, type, starting_balance_cents, currency))
+        if row:
+            row["id"] = str(row["id"])
+            row["user_id"] = str(row["user_id"])
+        return row
+
+    @staticmethod
+    def update_account(user_id: str, account_id: str, patch: dict) -> dict:
+        allowed = {"name", "type", "starting_balance_cents", "currency"}
+        sets = []
+        values = []
+
+        for k, v in patch.items():
+            if k not in allowed:
+                continue
+            sets.append(f"{k} = %s")
+            values.append(v)
+
+        if not sets:
+            return {"error": "Nenhum campo válido para atualizar."}
+
+        sets.append("updated_at = now()")
+
+        sql = f"""
+        update public.finance_accounts
+        set {", ".join(sets)}
+        where id = %s and user_id = %s and deleted_at is null
+        returning
+            id, user_id, name, type, starting_balance_cents, currency, created_at, updated_at;
+        """
+        values.extend([account_id, user_id])
+
+        row = DB.fetch_one(sql, tuple(values))
+        if not row:
+            return {"error": "Conta não encontrada ou já deletada."}
+        row["id"] = str(row["id"])
+        row["user_id"] = str(row["user_id"])
+        return row
+
+    @staticmethod
+    def create_card(
+        user_id: str,
+        name: str,
+        closing_day: int,
+        due_day: int,
+        brand: str = "other",
+        limit_cents: Optional[int] = None,
+        currency: str = "BRL",
+    ) -> dict:
+        sql = """
+        insert into public.finance_cards
+            (user_id, name, brand, closing_day, due_day, limit_cents, currency)
+        values
+            (%s, %s, %s, %s, %s, %s, %s)
+        returning
+            id, user_id, name, brand, closing_day, due_day, limit_cents, currency, status, created_at;
+        """
+        row = DB.fetch_one(
+            sql,
+            (_uuid(user_id), name, brand, closing_day, due_day, limit_cents, currency),
+        )
+        if row:
+            row["id"] = str(row["id"])
+            row["user_id"] = str(row["user_id"])
+        return dict(row)
+
+    @staticmethod
+    def update_card(user_id: str, card_id: str, patch: dict) -> dict:
+        allowed = {"name", "brand", "closing_day", "due_day", "limit_cents"}
+        sets = []
+        values = []
+
+        for k, v in patch.items():
+            if k not in allowed:
+                continue
+            sets.append(f"{k} = %s")
+            values.append(v)
+
+        if not sets:
+            return {"error": "Nenhum campo válido para atualizar."}
+
+        sets.append("updated_at = now()")
+
+        sql = f"""
+        update public.finance_cards
+           set {", ".join(sets)}
+         where id = %s
+           and user_id = %s
+           and deleted_at is null
+        returning
+            id, user_id, name, brand, closing_day, due_day, limit_cents, currency,
+            status, created_at, updated_at;
+        """
+        values.extend([card_id, user_id])
+
+        row = DB.fetch_one(sql, tuple(values))
+        if not row:
+            return {"error": "Cartão não encontrado ou já deletado."}
+        row["id"] = str(row["id"])
+        row["user_id"] = str(row["user_id"])
+        return dict(row)
+
+    @staticmethod
+    def update_card(user_id: str, card_id: str, patch: dict) -> dict:
+        allowed = {"name", "brand", "closing_day", "due_day", "limit_cents"}
+        sets = []
+        values = []
+
+        for k, v in patch.items():
+            if k not in allowed:
+                continue
+            sets.append(f"{k} = %s")
+            values.append(v)
+
+        if not sets:
+            return {"error": "Nenhum campo válido para atualizar."}
+
+        sets.append("updated_at = now()")
+
+        sql = f"""
+        update public.finance_cards
+           set {", ".join(sets)}
+         where id = %s
+           and user_id = %s
+        returning
+            id, user_id, name, brand, closing_day, due_day, limit_cents, currency,
+            status, created_at, updated_at;
+        """
+        values.extend([card_id, user_id])
+
+        row = DB.fetch_one(sql, tuple(values))
+        if not row:
+            return {"error": "Cartão não encontrado ou já deletado."}
+        row["id"] = str(row["id"])
+        row["user_id"] = str(row["user_id"])
+        return row
+    
+    @staticmethod
+    def resolve_account_id(
+        *,
+        user_id: str | UUID,
+        name: str,
+        auto_create: bool = True,
+    ) -> Optional[str]:
+        sql = """
+        select id
+          from public.finance_accounts
+         where user_id = %s
+           and lower(name) = lower(%s)
+           and deleted_at is null
+         limit 1;
+        """
+        row = DB.fetch_one(sql, (_uuid(user_id), name))
+        if row:
+            return str(row["id"])
+        if not auto_create:
+            return None
+        created = SupaBaseFinanceDB.create_account(
+            user_id=_uuid(user_id),
+            name=name,
+            type="checking",
+            starting_balance_cents=0,
+            currency="BRL",
+        )
+        return str(created["id"])
+    
+    @staticmethod
+    def resolve_card_id(
+        *,
+        user_id: str | UUID,
+        name: str,
+        auto_create: bool = False,
+        closing_day: int = 1,
+        due_day: int = 10,
+    ) -> Optional[str]:
+        sql = """
+        select id
+          from public.finance_cards
+         where user_id = %s
+           and lower(name) = lower(%s)
+           and deleted_at is null
+         limit 1;
+        """
+        row = DB.fetch_one(sql, (_uuid(user_id), name))
+        if row:
+            return str(row["id"])
+        if not auto_create:
+            return None
+        created = SupaBaseFinanceDB.create_card(
+            user_id=_uuid(user_id),
+            name=name,
+            brand="other",
+            closing_day=closing_day,
+            due_day=due_day,
+            limit_cents=None,
+            currency="BRL",
+        )
+        return str(created["id"])
