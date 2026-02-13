@@ -10,7 +10,7 @@ from src.mcp.request_context import get_request_context
 from src.data.supaBase.supabase_financial_db import SupaBaseFinanceDB
 
 
-AccountType = Literal["checking", "savings", "cash", "investment", "other"]
+AccountType = Literal["checking", "savings", "investment", "wallet"]
 
 
 class Args(BaseModel):
@@ -20,26 +20,27 @@ class Args(BaseModel):
     ]
 
     new_name: Optional[str] = Field(
-        None,
-        min_length=1,
-        max_length=100,
+        None, min_length=1, max_length=100,
         description="Novo nome da conta (opcional).",
     )
 
     new_type: Optional[AccountType] = Field(
         None,
-        description="Novo tipo: checking, savings, cash, investment, other (opcional).",
+        description="Novo tipo: checking, savings, investment, wallet (opcional).",
     )
 
-    new_initial_balance_cents: Optional[int] = Field(
+    new_current_balance_cents: Optional[int] = Field(
         None,
-        description="Novo saldo inicial em centavos (opcional). Não afeta transações já registradas.",
+        description=(
+            "Saldo atual real da conta em centavos (opcional). "
+            "Use quando o usuário informar o saldo real da conta. "
+            "Ex: R$ 1.500,00 → 150000. "
+            "Isso ajusta o starting_balance_cents para que o saldo calculado bata com o real."
+        ),
     )
 
     new_currency: Optional[str] = Field(
-        None,
-        min_length=3,
-        max_length=3,
+        None, min_length=3, max_length=3,
         description="Nova moeda (ex: BRL) (opcional).",
     )
 
@@ -47,25 +48,32 @@ class Args(BaseModel):
 async def _run(**kwargs) -> Dict[str, Any]:
     user_id = get_request_context().user_id
 
-    # Resolve nome → UUID
     account_id = SupaBaseFinanceDB.resolve_account_id(
         user_id=user_id,
         name=kwargs["account_name"],
-        auto_create=False,  # edição: não cria, retorna erro se não existir
+        auto_create=False,
     )
 
     if not account_id:
         return {"error": f"Conta '{kwargs['account_name']}' não encontrada."}
 
     patch: Dict[str, Any] = {}
+
     if kwargs.get("new_name") is not None:
         patch["name"] = kwargs["new_name"]
     if kwargs.get("new_type") is not None:
         patch["type"] = kwargs["new_type"]
-    if kwargs.get("new_initial_balance_cents") is not None:
-        patch["initial_balance_cents"] = kwargs["new_initial_balance_cents"]
     if kwargs.get("new_currency") is not None:
         patch["currency"] = kwargs["new_currency"]
+
+    # Saldo atual informado pelo usuário:
+    # recalcula starting_balance_cents = saldo_desejado - soma_das_transações
+    if kwargs.get("new_current_balance_cents") is not None:
+        txn_sum = SupaBaseFinanceDB.get_account_txn_sum(
+            user_id=user_id,
+            account_id=account_id,
+        )
+        patch["starting_balance_cents"] = kwargs["new_current_balance_cents"] - txn_sum
 
     if not patch:
         return {"error": "Nenhum campo para atualizar foi informado."}
@@ -82,7 +90,8 @@ TOOL = StructuredTool.from_function(
     name="finance_edit_account",
     description=(
         "Edita uma conta financeira existente identificada pelo nome (ex: 'Itaú'). "
-        "Informe apenas os campos que deseja alterar: nome, tipo, saldo inicial ou moeda."
+        "Para corrigir o saldo, use new_current_balance_cents com o valor real atual em centavos. "
+        "Também permite alterar nome, tipo e moeda."
     ),
     args_schema=Args,
     coroutine=_run,
