@@ -6,7 +6,6 @@ class Settings(BaseSettings):
     APP_NAME: str 
     APP_VERSION: str="0.6.0"
     DEBUG: bool = True
-    SUPABASE_JWT_SECRET: str
     OPENAI_API_KEY: str
     MODEL_NAME: str 
     FRONT_URL: str
