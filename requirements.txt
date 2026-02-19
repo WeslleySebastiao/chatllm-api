@@ -71,3 +71,6 @@ yarl==1.22.0
 zstandard==0.25.0
 psycopg2-binary
 python-dateutil
+PyJWT==2.10.1
+PyJWT[crypto]==2.10.1
+cryptography
