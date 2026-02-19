@@ -3,6 +3,7 @@ from fastapi import FastAPI
 import logging
 import uvicorn
 import time
+from src.core.auth import auth_middleware
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from src.core.logging import setup_logging
@@ -50,6 +51,8 @@ app.include_router(router)
 app.include_router(router_view)
 app.include_router(router_review)
 app.include_router(router_reviews_read)
+app.middleware("http")(auth_middleware)
+
 
 @app.get("/")
 def health():
