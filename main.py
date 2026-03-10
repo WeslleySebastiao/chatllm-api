@@ -12,6 +12,7 @@ from src.api.reviews.read_routes import router_reviews_read
 from src.api.routes import router
 from src.api.DashboardViews.routes import router_view
 from src.api.reviews.execution_routes import router_review
+from src.api.a2a.routes import router_a2a 
 from src.mcp.loader import load_all_tools
 import os
 from src.mcp.registry import get_all_tools
@@ -51,6 +52,7 @@ app.include_router(router)
 app.include_router(router_view)
 app.include_router(router_review)
 app.include_router(router_reviews_read)
+app.include_router(router_a2a)                                  # ← NOVO: A2A
 app.middleware("http")(auth_middleware)
 
 
@@ -61,4 +63,3 @@ def health():
 
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8080)
-    
