@@ -7,7 +7,7 @@ from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-PUBLIC_PATHS = {"/", "/docs", "/openapi.json", "/redoc"}
+PUBLIC_PATHS = {"/", "/docs", "/openapi.json", "/redoc", "/.well-known/agent.json"}
 
 # PyJWKClient já faz cache interno das chaves automaticamente
 _jwks_client: PyJWKClient | None = None
